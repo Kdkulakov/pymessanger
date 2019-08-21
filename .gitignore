@@ -1,0 +1,5 @@
+venev
+.pytest_cache
+.coverage
+__pycache__
+logs
