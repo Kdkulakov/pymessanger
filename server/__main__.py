@@ -17,6 +17,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+# default config use if config file not set
 default_config = {
     'host': 'localhost',
     'port': 8001,
@@ -30,21 +31,31 @@ if args.config:
 
 host, port = (default_config.get('host'), default_config.get('port'))
 
-logger = logging.getLogger('main')
-logger.setLevel(logging.DEBUG)
+# logger = logging.getLogger('main')
+# logger.setLevel(logging.DEBUG)
+#
+# formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+#
+# LOGS_DIR = os.path.exists(os.path.dirname('./logs'))
+#
+# if not LOGS_DIR:
+#     os.makedirs('logs')
+#
+# handler = logging.FileHandler('logs/main.log')
+# handler.setFormatter(formatter)
+# handler.setLevel(logging.DEBUG)
+#
+# logger.addHandler(handler)
 
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
-LOGS_DIR = os.path.exists(os.path.dirname('./logs'))
-
-if not LOGS_DIR:
-    os.makedirs('logs')
-
-handler = logging.FileHandler('logs/main.log')
-handler.setFormatter(formatter)
-handler.setLevel(logging.DEBUG)
-
-logger.addHandler(handler)
+# logger handler - write log file + console stream
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/main.log', encoding='UTF-8'),
+        logging.StreamHandler()
+    ]
+)
 
 
 try:
@@ -54,15 +65,15 @@ try:
         sock.listen(5)
     except Exception as err:
         print("ERRORO in bind server port: " + str(err))
-        logger.info(f'ERRORO in bind server port: {str(err)}')
+        logging.info(f'ERRORO in bind server port: {str(err)}')
 
-    logger.info(f'Server was started with {host}:{port}')
+    logging.info(f'Server was started with {host}:{port}')
     print(f'Server was started with {host}:{port}')
 
     while True:
         try:
             client, address = sock.accept()
-            logger.info(f'Clietn was connected with {address[0]}:{address[1]}')
+            logging.info(f'Clietn was connected with {address[0]}:{address[1]}')
         except Exception as err:
             print("Error: " + str(err))
             break
@@ -75,18 +86,18 @@ try:
             controller = resolver(action_name)
             if controller:
                 try:
-                    logger.debug(f'Controller {action_name} resolved with request: {request}')
+                    logging.debug(f'Controller {action_name} resolved with request: {request}')
 
                     response = controller(request)
                 except Exception as err:
-                    logger.critical(f'Controller {action_name} error: {err}')
+                    logging.critical(f'Controller {action_name} error: {err}')
                     response = make_response(request, 500, 'Internal server error')
             else:
-                logger.error(f'Controller {action_name} not found')
+                logging.error(f'Controller {action_name} not found')
 
                 response = make_response(request, 404, f'Action with name {action_name} not supported')
         else:
-            logger.error(f'Controller wrong request: {request}')
+            logging.error(f'Controller wrong request: {request}')
 
             response = make_response(request, 400, 'wrong request format')
 
@@ -97,5 +108,5 @@ try:
         client.close()
 
 except KeyboardInterrupt:
-    logger.info('Server shutdown')
+    logging.info('Server shutdown')
     print('Server shutdown')
