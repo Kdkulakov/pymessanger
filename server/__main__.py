@@ -4,7 +4,7 @@ import logging
 import os
 from socket import socket
 from argparse import ArgumentParser
-
+import hashlib
 from protocol import validate_request, make_response
 from resolvers import resolver
 

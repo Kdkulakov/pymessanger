@@ -1,5 +1,6 @@
 from ruamel import yaml
 from socket import socket
+import hashlib
 from argparse import ArgumentParser
 import json
 import datetime
@@ -26,13 +27,19 @@ sock.connect((host, port))
 
 print(f'CLient was started')
 
+hash_obj = hashlib.sha3_256()
+hash_obj.update(
+    str(datetime.datetime.now().timestamp()).encode()
+)
+
 action = input('Enter action: ')
 data = input('Enter message: ')
 
 request = {
     'action': action,
     'data': data,
-    'time': datetime.datetime.now().timestamp()
+    'time': datetime.datetime.now().timestamp(),
+    'token': hash_obj.hexdigest()
 }
 
 s_request = json.dumps(request)
